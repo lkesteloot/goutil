@@ -10,8 +10,13 @@ import (
 // Wrap this type so that we can panic() in error cases.
 type Tx sql.Tx
 
+// Like the Exec() function of sql.Tx.
+func (tx *Tx) Exec(query string, args ...interface{}) (sql.Result, error) {
+	return ((*sql.Tx)(tx)).Exec(query, args...)
+}
+
 // Like the Exec() function of sql.Tx, but calls panic() on error.
-func (tx *Tx) Exec(query string, args ...interface{}) sql.Result {
+func (tx *Tx) MustExec(query string, args ...interface{}) sql.Result {
 	r, err := ((*sql.Tx)(tx)).Exec(query, args...)
 	if err != nil {
 		// Panic so that we have the stack trace and the error message.
@@ -22,7 +27,7 @@ func (tx *Tx) Exec(query string, args ...interface{}) sql.Result {
 }
 
 // Like the Query() function of sql.Tx, but calls panic() on error.
-func (tx *Tx) Query(query string, args ...interface{}) *sql.Rows {
+func (tx *Tx) MustQuery(query string, args ...interface{}) *sql.Rows {
 	r, err := ((*sql.Tx)(tx)).Query(query, args...)
 	if err != nil {
 		// Panic so that we have the stack trace and the error message.
@@ -93,11 +98,11 @@ func GetSchemaVersion(tx *Tx) (version int) {
 		// Without it, it stores whatever value you gave it, which might be local
 		// time or whatever. See sections 8.5.1.3 (TIMESTAMP) and 9.9.3 (WITH TIME
 		// ZONE) of the PostgreSQL reference manual.
-		tx.Exec(`
+		tx.MustExec(`
 			CREATE DOMAIN global_timestamp
 			AS timestamp(0) with time zone`)
 
-		tx.Exec(`
+		tx.MustExec(`
 			CREATE TABLE schema_tracker (
 				version integer PRIMARY KEY,
 				comment text NOT NULL,
@@ -129,7 +134,7 @@ func GetSchemaVersion(tx *Tx) (version int) {
 func AddVersion(tx *Tx, version int, comment string) {
 	log.Printf("Applying database schema version %d (%s)", version, comment)
 
-	tx.Exec(`
+	tx.MustExec(`
 		INSERT INTO schema_tracker (version, comment)
 		VALUES ($1, $2)`, version, comment)
 }
