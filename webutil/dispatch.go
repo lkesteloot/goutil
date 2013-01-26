@@ -3,6 +3,7 @@
 package webutil
 
 import (
+	"fmt"
 	"log"
 	"net/http"
 	"regexp"
@@ -19,39 +20,76 @@ type IntegerHandlerFunc func(http.ResponseWriter, *http.Request, int)
 // Map from URL pattern to handler function with integer parameter.
 type DispatchIntegerHandlerMap map[string]IntegerHandlerFunc
 
-// Create a handler that dispatches based on a sequence of maps. Each map is
-// inspected in turn, and must be one of DispatchHandlerMap or DispatchIntegerHandlerMap.
+// Create a handler that dispatches based on a set of maps. Each map must be
+// one of DispatchHandlerMap or DispatchIntegerHandlerMap.
+//
 // The key of each map is a string of the form "method url", where method is "GET",
 // "POST", "DELETE", etc. and url is a URL or URL pattern. A pattern can include a
 // single %d if the map is a DispatchIntegerHandlerMap, and the value at the %d
 // will be parsed and passed to the handler.
 func DispatchHandler(maps ...interface{}) http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		for _, genericMap := range maps {
-			switch m := genericMap.(type) {
-			case DispatchHandlerMap:
-				for pattern, function := range m {
-					fields := strings.SplitN(pattern, " ", 2)
-					if fields[0] == r.Method && fields[1] == r.URL.Path {
-						function(w, r)
-						return
-					}
+	// Data structures for storing maps.
+	type Handler struct {
+		method string
+		url string
+		function http.HandlerFunc
+	}
+	type IntegerHandler struct {
+		method string
+		urlRegexp *regexp.Regexp
+		function IntegerHandlerFunc
+	}
+	var handlers []*Handler
+	var integerHandlers []*IntegerHandler
+
+	// Pre-process handlers.
+	for _, genericMap := range maps {
+		switch m := genericMap.(type) {
+		case DispatchHandlerMap:
+			for pattern, function := range m {
+				fields := strings.SplitN(pattern, " ", 2)
+				handlers = append(handlers, &Handler{
+					method: fields[0],
+					url: fields[1],
+					function: function,
+				})
+			}
+		case DispatchIntegerHandlerMap:
+			for pattern, function := range m {
+				fields := strings.SplitN(pattern, " ", 2)
+				if len(fields) != 2 {
+					panic("Integer handler pattern must have two fields.")
 				}
-			case DispatchIntegerHandlerMap:
-				for pattern, function := range m {
-					fields := strings.SplitN(pattern, " ", 2)
-					urlPattern := "^" + strings.Replace(regexp.QuoteMeta(fields[1]),
-						"%d", "([0-9]+)", 1) + "$"
-					urlRegexp := regexp.MustCompile(urlPattern)
-					if fields[0] == r.Method {
-						fields = urlRegexp.FindStringSubmatch(r.URL.Path)
-						if len(fields) == 2 {
-							number, err := strconv.Atoi(fields[1])
-							if err == nil {
-								function(w, r, number)
-								return
-							}
-						}
+				urlPattern := "^" + strings.Replace(regexp.QuoteMeta(fields[1]),
+					"%d", "([0-9]+)", 1) + "$"
+				urlRegexp := regexp.MustCompile(urlPattern)
+				integerHandlers = append(integerHandlers, &IntegerHandler{
+					method: fields[0],
+					urlRegexp: urlRegexp,
+					function: function,
+				})
+			}
+		default:
+			panic(fmt.Sprintf("Unknown map type %T", genericMap))
+		}
+	}
+
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		for _, handler := range handlers {
+			if r.Method == handler.method && r.URL.Path == handler.url {
+				handler.function(w, r)
+				return
+			}
+		}
+
+		for _, handler := range integerHandlers {
+			if r.Method == handler.method {
+				matches := handler.urlRegexp.FindStringSubmatch(r.URL.Path)
+				if len(matches) == 2 {
+					number, err := strconv.Atoi(matches[1])
+					if err == nil {
+						handler.function(w, r, number)
+						return
 					}
 				}
 			}
