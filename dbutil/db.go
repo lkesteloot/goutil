@@ -3,7 +3,7 @@ package dbutil
 import (
 	"database/sql"
 	"fmt"
-	_ "github.com/bmizerany/pq"
+	"github.com/bmizerany/pq"
 	"log"
 )
 
@@ -137,4 +137,12 @@ func AddVersion(tx *Tx, version int, comment string) {
 	tx.MustExec(`
 		INSERT INTO schema_tracker (version, comment)
 		VALUES ($1, $2)`, version, comment)
+}
+
+// Return true if the error we got from a Scan() of QueryRow() was a missing row,
+// false if it's a more serious error.
+func IsQueryRowMissing(err error) bool {
+	// It'll be serious if it's a PGError. This is pretty brittle.
+	_, ok := err.(pq.PGError)
+	return !ok
 }
