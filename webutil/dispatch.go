@@ -4,6 +4,7 @@ package webutil
 
 import (
 	"fmt"
+	"github.com/lkesteloot/goutil/dbutil"
 	"log"
 	"net/http"
 	"regexp"
@@ -15,17 +16,17 @@ import (
 type DispatchHandlerMap map[string]http.HandlerFunc
 
 // A handler function with an additional integer parameter, usually for an entity ID.
-type IntegerHandlerFunc func(http.ResponseWriter, *http.Request, int)
+type IdFieldHandlerFunc func(http.ResponseWriter, *http.Request, dbutil.IdField)
 
 // Map from URL pattern to handler function with integer parameter.
-type DispatchIntegerHandlerMap map[string]IntegerHandlerFunc
+type DispatchIdFieldHandlerMap map[string]IdFieldHandlerFunc
 
 // Create a handler that dispatches based on a set of maps. Each map must be
-// one of DispatchHandlerMap or DispatchIntegerHandlerMap.
+// one of DispatchHandlerMap or DispatchIdFieldHandlerMap.
 //
 // The key of each map is a string of the form "method url", where method is "GET",
 // "POST", "DELETE", etc. and url is a URL or URL pattern. A pattern can include a
-// single %d if the map is a DispatchIntegerHandlerMap, and the value at the %d
+// single %d if the map is a DispatchIdFieldHandlerMap, and the value at the %d
 // will be parsed and passed to the handler.
 func DispatchHandler(maps ...interface{}) http.Handler {
 	// Data structures for storing maps.
@@ -34,13 +35,13 @@ func DispatchHandler(maps ...interface{}) http.Handler {
 		url string
 		function http.HandlerFunc
 	}
-	type IntegerHandler struct {
+	type IdFieldHandler struct {
 		method string
 		urlRegexp *regexp.Regexp
-		function IntegerHandlerFunc
+		function IdFieldHandlerFunc
 	}
 	var handlers []*Handler
-	var integerHandlers []*IntegerHandler
+	var integerHandlers []*IdFieldHandler
 
 	// Pre-process handlers.
 	for _, genericMap := range maps {
@@ -54,16 +55,16 @@ func DispatchHandler(maps ...interface{}) http.Handler {
 					function: function,
 				})
 			}
-		case DispatchIntegerHandlerMap:
+		case DispatchIdFieldHandlerMap:
 			for pattern, function := range m {
 				fields := strings.SplitN(pattern, " ", 2)
 				if len(fields) != 2 {
-					panic("Integer handler pattern must have two fields.")
+					panic("IdField handler pattern must have two fields.")
 				}
 				urlPattern := "^" + strings.Replace(regexp.QuoteMeta(fields[1]),
 					"%d", "([0-9]+)", 1) + "$"
 				urlRegexp := regexp.MustCompile(urlPattern)
-				integerHandlers = append(integerHandlers, &IntegerHandler{
+				integerHandlers = append(integerHandlers, &IdFieldHandler{
 					method: fields[0],
 					urlRegexp: urlRegexp,
 					function: function,
@@ -88,7 +89,7 @@ func DispatchHandler(maps ...interface{}) http.Handler {
 				if len(matches) == 2 {
 					number, err := strconv.Atoi(matches[1])
 					if err == nil {
-						handler.function(w, r, number)
+						handler.function(w, r, dbutil.IdField(number))
 						return
 					}
 				}
