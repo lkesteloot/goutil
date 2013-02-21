@@ -95,7 +95,7 @@ func generateNamedParameters(fields []string) string {
 	var params []string
 
 	for i, field := range(fields) {
-		params = append(params, fmt.Sprintf(`"%s"=$%d`, field, i + 1))
+		params = append(params, fmt.Sprintf(`%s=$%d`, field, i + 1))
 	}
 
 	return strings.Join(params, ",")
