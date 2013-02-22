@@ -11,8 +11,8 @@ import (
 // Stores a percentage. Note that the value is the actual percentage (0 to 100),
 // not the normalized value 0 to 1. Could be null.
 type Percent struct {
-	value float32
-	isNull bool
+	Value float32
+	IsNull bool
 }
 
 // For sql.Scanner interface:
@@ -39,11 +39,11 @@ func (i *Percent) Scan(src interface{}) error {
 
 // Converts the value to an object that can be written to a database.
 func (i Percent) Print() interface{} {
-	if i.isNull {
+	if i.IsNull {
 		return nil
 	}
 
-	return i.value
+	return i.Value
 }
 
 // Converts a string to Percent. This is the inverse of ToTextField().
@@ -66,9 +66,9 @@ func ParsePercent(s string) Percent {
 
 // Return the plain text to show in an HTML text field.
 func (p *Percent) ToTextField() string {
-	if p.isNull {
+	if p.IsNull {
 		return ""
 	}
 
-	return fmt.Sprintf("%g%%", p.value)
+	return fmt.Sprintf("%g%%", p.Value)
 }

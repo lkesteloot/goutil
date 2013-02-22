@@ -10,8 +10,8 @@ import (
 
 // Stores money in pennies. Could be null.
 type Money struct {
-	pennies int
-	isNull bool
+	Pennies int
+	IsNull bool
 }
 
 // For sql.Scanner interface:
@@ -36,11 +36,11 @@ func (i *Money) Scan(src interface{}) error {
 
 // Converts the value to an object that can be written to a database.
 func (i Money) Print() interface{} {
-	if i.isNull {
+	if i.IsNull {
 		return nil
 	}
 
-	return i.pennies
+	return i.Pennies
 }
 
 // Converts a string to Money. This is the inverse of ToTextField().
@@ -73,9 +73,9 @@ func ParseMoney(s string) Money {
 
 // Return the plain text to show in an HTML text field.
 func (m *Money) ToTextField() string {
-	if m.isNull {
+	if m.IsNull {
 		return ""
 	}
 
-	return fmt.Sprintf("$%d.%02d", m.pennies/100, m.pennies%100)
+	return fmt.Sprintf("$%d.%02d", m.Pennies/100, m.Pennies%100)
 }
