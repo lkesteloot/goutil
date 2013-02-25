@@ -1,6 +1,6 @@
 // Copyright 2013 Lawrence Kesteloot
 
-package sort
+package sortutil
 
 import (
 	"testing"

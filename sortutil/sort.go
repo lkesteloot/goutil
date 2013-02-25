@@ -1,6 +1,6 @@
 // Copyright 2013 Lawrence Kesteloot
 
-package sort
+package sortutil
 
 // Provides a function to sort strings taking into account embedded numbers.
 
