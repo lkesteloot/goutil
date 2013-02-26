@@ -72,7 +72,7 @@ func ParseMoney(s string) Money {
 }
 
 // Return the plain text to show in an HTML text field.
-func (m *Money) ToTextField() string {
+func (m Money) ToTextField() string {
 	if m.IsNull {
 		return ""
 	}

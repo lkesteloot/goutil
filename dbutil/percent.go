@@ -65,7 +65,7 @@ func ParsePercent(s string) Percent {
 }
 
 // Return the plain text to show in an HTML text field.
-func (p *Percent) ToTextField() string {
+func (p Percent) ToTextField() string {
 	if p.IsNull {
 		return ""
 	}
