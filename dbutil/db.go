@@ -5,7 +5,7 @@ package dbutil
 import (
 	"database/sql"
 	"fmt"
-	"github.com/bmizerany/pq"
+	"github.com/lib/pq"
 	"log"
 )
 
