@@ -79,3 +79,13 @@ func (m Money) ToTextField() string {
 
 	return fmt.Sprintf("$%d.%02d", m.Pennies/100, m.Pennies%100)
 }
+
+// Returns the money times the multiplier. Returns a Null Money if
+// the object is Null.
+func (m Money) MultipliedBy(x float32) Money {
+	if m.IsNull {
+		return m
+	}
+
+	return Money{int(float32(m.Pennies)*x + 0.5), false}
+}
