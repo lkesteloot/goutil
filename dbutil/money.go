@@ -57,7 +57,14 @@ func ParseMoney(s string) Money {
 	pennies := 0
 	if i >= 0 {
 		var err error
-		pennies, err = strconv.Atoi(s[i+1:])
+		penniesStr := s[i+1:]
+		for len(penniesStr) < 2 {
+			penniesStr = penniesStr + "0"
+		}
+		if len(penniesStr) > 2 {
+			penniesStr = penniesStr[:2]
+		}
+		pennies, err = strconv.Atoi(penniesStr)
 		if err != nil {
 			pennies = 0
 		}
