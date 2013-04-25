@@ -47,9 +47,9 @@ func (i Percent) Print() interface{} {
 }
 
 // Converts a string to Percent. This is the inverse of ToTextField().
-func ParsePercent(s string) Percent {
+func ParsePercent(s string, allowNull bool) Percent {
 	if s == "" {
-		return Percent{0, true}
+		return Percent{0, allowNull}
 	}
 
 	// Strip percent sign and whitespace.
@@ -58,7 +58,7 @@ func ParsePercent(s string) Percent {
 	// Parse as float.
 	floatValue, err := strconv.ParseFloat(s, 32)
 	if err != nil {
-		return Percent{0, true}
+		return Percent{0, allowNull}
 	}
 
 	return Percent{float32(floatValue), false}
