@@ -38,3 +38,13 @@ func (id IdField) Print() interface{} {
 
 	return int(id)
 }
+
+// Parse a field returned from a web form. If the ID can't be parsed, returns
+// the default value.
+func ParseIdField(s string, defaultValue IdField) IdField {
+	id, err := strconv.Atoi(s)
+	if err != nil {
+		return defaultValue
+	}
+	return IdField(id)
+}
