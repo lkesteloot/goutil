@@ -1,7 +1,9 @@
 package webutil
 
 import (
+	"bufio"
 	"log"
+	"net"
 	"net/http"
 	"time"
 )
@@ -23,6 +25,11 @@ func (s *StatusResponseWriter) Write(data []byte) (int, error) {
 func (s *StatusResponseWriter) WriteHeader(statusCode int) {
 	s.statusCode = statusCode
 	s.w.WriteHeader(statusCode)
+}
+
+// For interface net/http/Hijacker:
+func (s *StatusResponseWriter) Hijack() (net.Conn, *bufio.ReadWriter, error) {
+	return (s.w.(http.Hijacker)).Hijack()
 }
 
 func (s *StatusResponseWriter) StatusCode() int {
