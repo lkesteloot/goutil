@@ -15,21 +15,37 @@ type Percent struct {
 	IsNull bool
 }
 
+// Make a new valid percent with the specified value.
+func NewPercent(value float32) Percent {
+	return Percent{
+		Value:  value,
+		IsNull: false,
+	}
+}
+
+// Make a new null percent.
+func NullPercent() Percent {
+	return Percent{
+		Value:  0,
+		IsNull: true,
+	}
+}
+
 // For sql.Scanner interface:
 func (i *Percent) Scan(src interface{}) error {
 	switch s := src.(type) {
 	case nil:
-		*i = Percent{0, true}
+		*i = NullPercent()
 	case string:
 		floatValue, err := strconv.ParseFloat(s, 32)
 		if err != nil {
 			return err
 		}
-		*i = Percent{float32(floatValue), false}
+		*i = NewPercent(float32(floatValue))
 	case float32:
-		*i = Percent{s, false}
+		*i = NewPercent(s)
 	case float64:
-		*i = Percent{float32(s), false}
+		*i = NewPercent(float32(s))
 	default:
 		panic(fmt.Sprintf("Unknown type %T", src))
 	}
@@ -61,7 +77,7 @@ func ParsePercent(s string, allowNull bool) Percent {
 		return Percent{0, allowNull}
 	}
 
-	return Percent{float32(floatValue), false}
+	return NewPercent(float32(floatValue))
 }
 
 // Return the plain text to show in an HTML text field.

@@ -12,13 +12,29 @@ type Boolean struct {
 	IsNull bool
 }
 
+// Return a valid boolean with the specified value.
+func NewBoolean(value bool) Boolean {
+	return Boolean{
+		Value:  value,
+		IsNull: false,
+	}
+}
+
+// Return a null boolean.
+func NullBoolean() Boolean {
+	return Boolean{
+		Value:  false,
+		IsNull: true,
+	}
+}
+
 // For sql.Scanner interface:
 func (i *Boolean) Scan(src interface{}) error {
 	switch s := src.(type) {
 	case nil:
-		*i = Boolean{false, true}
+		*i = NullBoolean()
 	case bool:
-		*i = Boolean{s, false}
+		*i = NewBoolean(s)
 	default:
 		panic(fmt.Sprintf("Unknown type %T", src))
 	}
@@ -38,10 +54,10 @@ func (i Boolean) Print() interface{} {
 // Converts a string to Boolean. This is the inverse of ToTextField().
 func ParseBoolean(s string) Boolean {
 	if s == "" {
-		return Boolean{false, true}
+		return NullBoolean()
 	}
 
-	return Boolean{s == "true", false}
+	return NewBoolean(s == "true")
 }
 
 // Return the plain text to show in an HTML text field.

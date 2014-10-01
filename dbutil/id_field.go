@@ -6,7 +6,7 @@ import (
 	"strconv"
 )
 
-// Stores a database ID (either primary key or foreign key).
+// Stores a database ID (either primary key or foreign key). We use 0 to mean NULL.
 type IdField int
 
 // For sql.Scanner interface:

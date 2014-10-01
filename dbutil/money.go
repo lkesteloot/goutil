@@ -14,19 +14,35 @@ type Money struct {
 	IsNull bool
 }
 
+// Make a new money with pennies.
+func NewMoney(pennies int) Money {
+	return Money{
+		Pennies: pennies,
+		IsNull:  false,
+	}
+}
+
+// Make a null money structure.
+func NullMoney() Money {
+	return Money{
+		Pennies: 0,
+		IsNull:  true,
+	}
+}
+
 // For sql.Scanner interface:
 func (i *Money) Scan(src interface{}) error {
 	switch s := src.(type) {
 	case nil:
-		*i = Money{0, true}
+		*i = NullMoney()
 	case string:
 		intValue, err := strconv.Atoi(s)
 		if err != nil {
 			return err
 		}
-		*i = Money{intValue, false}
+		*i = NewMoney(intValue)
 	case int64:
-		*i = Money{int(s), false}
+		*i = NewMoney(int(s))
 	default:
 		panic("Unknown type")
 	}
@@ -46,7 +62,7 @@ func (i Money) Print() interface{} {
 // Converts a string to Money. This is the inverse of ToTextField().
 func ParseMoney(s string) Money {
 	if s == "" {
-		return Money{0, true}
+		return NullMoney()
 	}
 
 	// Strip dollar sign and whitespace.
@@ -75,7 +91,7 @@ func ParseMoney(s string) Money {
 		dollars = 0
 	}
 
-	return Money{dollars*100 + pennies, false}
+	return NewMoney(dollars*100 + pennies)
 }
 
 // Return the plain text to show in an HTML text field.
@@ -94,5 +110,5 @@ func (m Money) MultipliedBy(x float32) Money {
 		return m
 	}
 
-	return Money{int(float32(m.Pennies)*x + 0.5), false}
+	return NewMoney(int(float32(m.Pennies)*x + 0.5))
 }
