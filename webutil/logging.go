@@ -10,7 +10,7 @@ import (
 
 // A ResponseWriter proxy that keeps track of the status code.
 type StatusResponseWriter struct {
-	w http.ResponseWriter
+	w          http.ResponseWriter
 	statusCode int
 }
 

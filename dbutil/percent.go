@@ -11,7 +11,7 @@ import (
 // Stores a percentage. Note that the value is the actual percentage (0 to 100),
 // not the normalized value 0 to 1. Could be null.
 type Percent struct {
-	Value float32
+	Value  float32
 	IsNull bool
 }
 

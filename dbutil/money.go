@@ -11,7 +11,7 @@ import (
 // Stores money in pennies. Could be null.
 type Money struct {
 	Pennies int
-	IsNull bool
+	IsNull  bool
 }
 
 // Make a new money with pennies.

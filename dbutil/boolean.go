@@ -8,7 +8,7 @@ import (
 
 // Stores a boolean. Could be null.
 type Boolean struct {
-	Value bool
+	Value  bool
 	IsNull bool
 }
 

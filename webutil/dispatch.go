@@ -31,14 +31,14 @@ type DispatchIdFieldHandlerMap map[string]IdFieldHandlerFunc
 func DispatchHandler(maps ...interface{}) http.Handler {
 	// Data structures for storing maps.
 	type Handler struct {
-		method string
-		url string
+		method   string
+		url      string
 		function http.HandlerFunc
 	}
 	type IdFieldHandler struct {
-		method string
+		method    string
 		urlRegexp *regexp.Regexp
-		function IdFieldHandlerFunc
+		function  IdFieldHandlerFunc
 	}
 	var handlers []*Handler
 	var integerHandlers []*IdFieldHandler
@@ -50,8 +50,8 @@ func DispatchHandler(maps ...interface{}) http.Handler {
 			for pattern, function := range m {
 				fields := strings.SplitN(pattern, " ", 2)
 				handlers = append(handlers, &Handler{
-					method: fields[0],
-					url: fields[1],
+					method:   fields[0],
+					url:      fields[1],
 					function: function,
 				})
 			}
@@ -65,9 +65,9 @@ func DispatchHandler(maps ...interface{}) http.Handler {
 					"%d", "([0-9]+)", 1) + "$"
 				urlRegexp := regexp.MustCompile(urlPattern)
 				integerHandlers = append(integerHandlers, &IdFieldHandler{
-					method: fields[0],
+					method:    fields[0],
 					urlRegexp: urlRegexp,
-					function: function,
+					function:  function,
 				})
 			}
 		default:

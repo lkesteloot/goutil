@@ -1,16 +1,16 @@
 package snake
 
 import (
-	"io"
+	"bufio"
 	"container/list"
 	"html"
-	"bufio"
+	"io"
 )
 
 const checkTagPairing = true
 
 type HtmlResponse struct {
-	w *bufio.Writer
+	w     *bufio.Writer
 	stack *list.List
 }
 
