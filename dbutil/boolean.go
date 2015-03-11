@@ -60,6 +60,24 @@ func ParseBoolean(s string) Boolean {
 	return NewBoolean(s == "true")
 }
 
+// Converts a string to Boolean, defaulting to False.
+func ParseBooleanDefaultFalse(s string) Boolean {
+	if s == "" {
+		return NewBoolean(false)
+	}
+
+	return NewBoolean(s == "true")
+}
+
+// Converts a string to Boolean, defaulting to True.
+func ParseBooleanDefaultTrue(s string) Boolean {
+	if s == "" {
+		return NewBoolean(true)
+	}
+
+	return NewBoolean(s == "true")
+}
+
 // Return the plain text to show in an HTML text field.
 func (p *Boolean) ToTextField() string {
 	if p.IsNull {
