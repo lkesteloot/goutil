@@ -6,6 +6,7 @@ import (
 	"github.com/lkesteloot/goutil/dbutil"
 	"net/http"
 	"strconv"
+	"strings"
 )
 
 func GetIntFormValue(r *http.Request, key string, defaultValue int) int {
@@ -28,4 +29,20 @@ func GetIdFieldFormValue(r *http.Request, key string, defaultValue dbutil.IdFiel
 	}
 
 	return dbutil.IdField(value)
+}
+
+// Return an array of IdField for a form value. The value must be
+// comma-separated. Any ID that cannot be parsed is skipped.
+func GetIdsFieldFormValue(r *http.Request, key string) []dbutil.IdField {
+	valuesStr := strings.Split(r.FormValue(key), ",")
+	ids := make([]dbutil.IdField, 0)
+
+	for _, valueStr := range valuesStr {
+		id, err := strconv.Atoi(valueStr)
+		if err == nil {
+			ids = append(ids, dbutil.IdField(id))
+		}
+	}
+
+	return ids
 }
