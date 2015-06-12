@@ -112,3 +112,17 @@ func (m Money) MultipliedBy(x float32) Money {
 
 	return NewMoney(int(float32(m.Pennies)*x + 0.5))
 }
+
+// Returns a new Money adding this and other. If either is Null,
+// returns the other.
+func (m Money) Add(other Money) Money {
+	if other.IsNull {
+		return m
+	}
+
+	if m.IsNull {
+		return other
+	}
+
+	return NewMoney(m.Pennies + other.Pennies)
+}
